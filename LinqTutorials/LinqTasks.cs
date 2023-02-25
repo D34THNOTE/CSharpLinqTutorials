@@ -347,7 +347,7 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Emp> Task12()
         {
-            IEnumerable<Emp> result = null;
+            IEnumerable<Emp> result = CustomExtensionMethods.GetEmpsWithDirectReport(Emps);
             return result;
         }
 
@@ -360,7 +360,11 @@ namespace LinqTutorials
         /// </summary>
         public static int Task13(int[] arr)
         {
-            int result = 0;
+            int result = arr.GroupBy(n => n)
+                .Where(g => g.Count() % 2 == 1)
+                // "reshaping" data
+                .Select(g => g.Key)
+                .FirstOrDefault();
             //result=
             return result;
         }
@@ -371,7 +375,10 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Dept> Task14()
         {
-            IEnumerable<Dept> result = null;
+            IEnumerable<Dept> result = Emps.GroupBy(emp => emp.Deptno)
+                .Where(g => g.Count() == 5 || g.Count() == 0)
+                .OrderBy(g => g.Key)
+                .Select(g => Depts.FirstOrDefault(d => d.Deptno == g.Key));
             //result =
             return result;
         }
@@ -386,5 +393,15 @@ namespace LinqTutorials
             return result;
         }
 
+        /// <summary>
+        /// The method should return only those employees who have min. 1 direct report.
+        /// Within the collection, employees should be sorted by name (ascending) and salary (descending).
+        /// </summary>
+        public static IEnumerable<Emp> GetEmpsWithDirectReport(this IEnumerable<Emp> emps)
+        {
+            return emps.Where(emp => emps.Any(e => e.Mgr != null && e.Mgr.Empno == emp.Empno))
+                .OrderBy(emp => emp.Ename)
+                .ThenByDescending(emp => emp.Salary);
+        }
     }
 }
